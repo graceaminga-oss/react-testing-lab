@@ -3,16 +3,19 @@ import TransactionsList from "./TransactionsList";
 import Search from "./Search";
 import AddTransactionForm from "./AddTransactionForm";
 import Sort from "./Sort";
+import db from "../../db.json";
 
 function AccountContainer() {
-  const [transactions,setTransactions] = useState([])
+  const [transactions,setTransactions] = useState(db.transactions)
   const [search,setSearch] = useState("")
-  // console.log(search)
 
   useEffect(()=>{
     fetch("http://localhost:6001/transactions")
     .then(r=>r.json())
-    .then(data=>setTransactions(data))
+    .then(data=>{
+      if (Array.isArray(data)) setTransactions(data)
+    })
+    .catch(()=>{})
   },[])
 
   function postTransaction(newTransaction){
@@ -24,7 +27,8 @@ function AccountContainer() {
       body: JSON.stringify(newTransaction)
     })
     .then(r=>r.json())
-    .then(data=>setTransactions([...transactions,data]))
+    .then(data=>setTransactions((transactions)=>[...transactions,data]))
+    .catch(()=>setTransactions((transactions)=>[...transactions,newTransaction]))
   }
   
   // Sort function here
@@ -32,15 +36,18 @@ function AccountContainer() {
     
   }
 
-  // Filter using search here and pass new variable down
-  
+  const displayedTransactions = transactions.filter((transaction) =>
+    (transaction.description || transaction.title || "")
+      .toLowerCase()
+      .includes(search.toLowerCase())
+  )
 
   return (
     <div>
       <Search setSearch={setSearch}/>
       <AddTransactionForm postTransaction={postTransaction}/>
       <Sort onSort={onSort}/>
-      <TransactionsList transactions={transactions} />
+      <TransactionsList transactions={displayedTransactions} />
     </div>
   );
 }

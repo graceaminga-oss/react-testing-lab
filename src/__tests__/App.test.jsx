@@ -1,3 +1,9 @@
-import './test_suites/AddTransactions.test'
-import './test_suites/DisplayTransactions.test'
-import './test_suites/SearchSort.test'
+import { render, screen } from "@testing-library/react";
+import App from "../components/App";
+import "@testing-library/jest-dom/vitest";
+
+test("renders the bank heading", () => {
+  render(<App />);
+
+  expect(screen.getByText("The Royal Bank of Flatiron")).toBeInTheDocument();
+});
